@@ -1,0 +1,64 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}دسته‌بندی‌ها{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">خدمات</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:category_list' %}" class="active">📂 دسته‌بندی‌ها</a></li>
+    <li><a href="{% url 'dashboard:owner:service_list' %}">✨ خدمات</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">دسته‌بندی‌های خدمات</h1>
+    <a href="{% url 'dashboard:owner:category_create' %}" class="btn btn-primary">➕ دسته‌بندی جدید</a>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>نام</th>
+                <th>آیکون</th>
+                <th>تعداد خدمات</th>
+                <th>وضعیت</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td><strong>{{ category.name }}</strong></td>
+                <td>{{ category.icon|default:'-' }}</td>
+                <td>{{ category.services.count }} خدمت</td>
+                <td>
+                    <span class="badge {% if category.is_active %}badge-green{% else %}badge-red{% endif %}">
+                        {% if category.is_active %}فعال{% else %}غیرفعال{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'dashboard:owner:category_create' %}?edit={{ category.pk }}" class="btn btn-secondary btn-sm">ویرایش</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center;color:#94a3b8;padding:2rem;">
+                    دسته‌بندی‌ای ثبت نشده است
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

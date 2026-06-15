@@ -1,0 +1,65 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}پنل مشتری{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">منو</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:customer:index' %}" class="active">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:customer:appointment_list' %}">📅 نوبت‌های من</a></li>
+    <li><a href="{% url 'dashboard:customer:appointment_create' %}">➕ رزرو نوبت</a></li>
+    <li><a href="{% url 'dashboard:customer:profile' %}">👤 پروفایل</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">خوش آمدید، {{ request.user.first_name }}! 👋</h1>
+    <a href="{% url 'dashboard:customer:appointment_create' %}" class="btn btn-primary">➕ رزرو نوبت جدید</a>
+</div>
+
+{% if upcoming_appointments %}
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header">نوبت‌های پیش رو</div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>خدمت</th>
+                    <th>کارکن</th>
+                    <th>تاریخ</th>
+                    <th>ساعت</th>
+                    <th>وضعیت</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apt in upcoming_appointments %}
+                <tr>
+                    <td>{{ apt.service.name }}</td>
+                    <td>{{ apt.staff.user.get_full_name }}</td>
+                    <td>{{ apt.date }}</td>
+                    <td>{{ apt.start_time|time:"H:i" }}</td>
+                    <td>
+                        <span class="badge {% if apt.status == 'confirmed' %}badge-green{% elif apt.status == 'pending' %}badge-yellow{% else %}badge-gray{% endif %}">
+                            {{ apt.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'dashboard:customer:appointment_detail' apt.pk %}" class="btn btn-secondary btn-sm">جزئیات</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-body" style="text-align:center;padding:3rem;">
+        <div style="font-size:3rem;margin-bottom:1rem;">📅</div>
+        <p class="text-gray-500" style="margin-bottom:1rem;">هنوز نوبتی رزرو نکرده‌اید</p>
+        <a href="{% url 'dashboard:customer:appointment_create' %}" class="btn btn-primary">رزرو اولین نوبت</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

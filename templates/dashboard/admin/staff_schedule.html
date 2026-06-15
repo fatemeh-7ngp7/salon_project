@@ -1,0 +1,91 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}برنامه کاری{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}" class="active">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">خدمات</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:category_list' %}">📂 دسته‌بندی‌ها</a></li>
+    <li><a href="{% url 'dashboard:owner:service_list' %}">✨ خدمات</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">برنامه کاری - {{ staff.user.get_full_name }}</h1>
+    <a href="{% url 'dashboard:owner:staff_detail' staff.pk %}" class="btn btn-secondary">بازگشت</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+    <!-- فرم افزودن -->
+    <div class="card">
+        <div class="card-header">افزودن/ویرایش روز کاری</div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_schedule">
+
+                <div class="form-group">
+                    <label class="form-label">روز هفته *</label>
+                    <select name="day_of_week" class="form-input" required>
+                        <option value="0">شنبه</option>
+                        <option value="1">یکشنبه</option>
+                        <option value="2">دوشنبه</option>
+                        <option value="3">سه‌شنبه</option>
+                        <option value="4">چهارشنبه</option>
+                        <option value="5">پنجشنبه</option>
+                        <option value="6">جمعه</option>
+                    </select>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                    <div class="form-group">
+                        <label class="form-label">شروع کار *</label>
+                        <input type="time" name="start_time" class="form-input" value="09:00" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">پایان کار *</label>
+                        <input type="time" name="end_time" class="form-input" value="18:00" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%;">ذخیره روز کاری</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- برنامه فعلی -->
+    <div class="card">
+        <div class="card-header">برنامه فعلی</div>
+        <div class="card-body">
+            {% for schedule in schedules %}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid #f8fafc;">
+                <div>
+                    <span class="font-semibold">{{ schedule.get_day_of_week_display }}</span>
+                    <span class="text-sm text-gray-500" style="margin-right:0.5rem;">
+                        {{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}
+                    </span>
+                </div>
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_schedule">
+                    <input type="hidden" name="schedule_id" value="{{ schedule.pk }}">
+                    <button type="submit" class="btn btn-danger btn-sm">حذف</button>
+                </form>
+            </div>
+            {% empty %}
+            <p class="text-gray-400 text-sm" style="text-align:center;padding:2rem 0;">برنامه‌ای ثبت نشده</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

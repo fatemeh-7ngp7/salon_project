@@ -1,0 +1,77 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}لیست نوبت‌ها{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">منو</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:receptionist:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:receptionist:appointment_list' %}" class="active">📅 نوبت‌ها</a></li>
+    <li><a href="{% url 'dashboard:receptionist:appointment_create' %}">➕ نوبت جدید</a></li>
+    <li><a href="{% url 'dashboard:receptionist:staff_schedule' %}">📋 برنامه کارکنان</a></li>
+    <li><a href="{% url 'dashboard:receptionist:customer_list' %}">👥 مشتریان</a></li>
+    <li><a href="{% url 'dashboard:receptionist:customer_create' %}">➕ مشتری جدید</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">لیست نوبت‌ها</h1>
+    <a href="{% url 'dashboard:receptionist:appointment_create' %}" class="btn btn-primary">➕ نوبت جدید</a>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>مشتری</th>
+                <th>کارکن</th>
+                <th>خدمت</th>
+                <th>تاریخ</th>
+                <th>ساعت</th>
+                <th>وضعیت</th>
+                <th>ثبت‌کننده</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for apt in appointments %}
+            <tr>
+                <td><strong>{{ apt.customer.get_full_name }}</strong></td>
+                <td>{{ apt.staff.user.get_full_name }}</td>
+                <td>{{ apt.service.name }}</td>
+                <td>{{ apt.date }}</td>
+                <td>{{ apt.start_time|time:"H:i" }} - {{ apt.end_time|time:"H:i" }}</td>
+                <td>
+                    <span class="badge
+                        {% if apt.status == 'confirmed' %}badge-green
+                        {% elif apt.status == 'pending' %}badge-yellow
+                        {% elif apt.status == 'cancelled' %}badge-red
+                        {% elif apt.status == 'completed' %}badge-blue
+                        {% else %}badge-gray{% endif %}">
+                        {{ apt.get_status_display }}
+                    </span>
+                </td>
+                <td class="text-sm text-gray-500">{{ apt.booked_by.get_full_name }}</td>
+                <td style="display:flex;gap:0.5rem;">
+                    <a href="{% url 'dashboard:receptionist:appointment_detail' apt.pk %}"
+                       class="btn btn-secondary btn-sm">جزئیات</a>
+                    {% if apt.is_cancellable %}
+                    <form method="post" action="{% url 'dashboard:receptionist:appointment_cancel' apt.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('آیا مطمئن هستید؟')">لغو</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem;">
+                    نوبتی ثبت نشده است
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

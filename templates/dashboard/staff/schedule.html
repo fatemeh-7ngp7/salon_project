@@ -1,0 +1,86 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}برنامه کاری من{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">منو</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:staff:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:staff:schedule' %}" class="active">📋 برنامه کاری من</a></li>
+    <li><a href="{% url 'dashboard:staff:appointment_list' %}">📅 نوبت‌های من</a></li>
+    <li><a href="{% url 'dashboard:staff:appointment_create' %}">➕ ثبت نوبت</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">برنامه کاری من</h1>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+
+    <!-- اطلاعات کارکن -->
+    <div class="card">
+        <div class="card-header">اطلاعات من</div>
+        <div class="card-body">
+            <div style="text-align:center;margin-bottom:1.5rem;">
+                <div style="width:4rem;height:4rem;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem;font-size:1.75rem;">
+                    👤
+                </div>
+                <h3 class="font-bold text-lg">{{ staff.user.get_full_name }}</h3>
+                <span class="badge badge-purple" style="margin-top:0.25rem;">
+                    {{ staff.specialty.name }}
+                </span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                <div style="display:flex;justify-content:space-between;">
+                    <span class="text-gray-500 text-sm">موبایل:</span>
+                    <strong style="direction:ltr;">{{ staff.user.phone }}</strong>
+                </div>
+
+                <!-- خدمات -->
+                <div>
+                    <p class="text-sm text-gray-500" style="margin-bottom:0.5rem;">خدمات من:</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+                        {% for ss in staff.staff_services.all %}
+                        {% if ss.is_active %}
+                        <span style="background:#f5f3ff;color:#6d28d9;padding:0.2rem 0.6rem;border-radius:9999px;font-size:0.72rem;font-weight:500;">
+                            {{ ss.service.name }}
+                            <span style="color:#94a3b8;">({{ ss.service.duration_display }})</span>
+                        </span>
+                        {% endif %}
+                        {% empty %}
+                        <span class="text-sm text-gray-400">خدماتی تعریف نشده</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- برنامه هفتگی -->
+    <div class="card">
+        <div class="card-header">برنامه کاری هفتگی</div>
+        <div class="card-body">
+            {% if schedules %}
+                {% for schedule in schedules %}
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid #f1f5f9;">
+                    <span class="font-semibold">{{ schedule.get_day_of_week_display }}</span>
+                    <div style="text-align:left;">
+                        <span class="badge badge-green" style="font-size:0.75rem;">
+                            {{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align:center;padding:2rem;color:#94a3b8;">
+                    <div style="font-size:2.5rem;margin-bottom:0.75rem;">📅</div>
+                    <p class="text-sm">برنامه کاری هنوز توسط مدیر تعریف نشده است.</p>
+                    <p class="text-sm" style="margin-top:0.25rem;">برای تعریف برنامه با مدیر سالن هماهنگ کنید.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

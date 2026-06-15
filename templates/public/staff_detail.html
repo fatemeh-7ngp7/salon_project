@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}{{ staff.user.get_full_name }} - سالن آرایشی{% endblock %}
+
+{% block content %}
+
+<!-- هدر کارکن -->
+<div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:4rem 1rem 6rem;">
+    <div class="container" style="text-align:center;color:white;">
+        <div style="width:6rem;height:6rem;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2.5rem;border:3px solid rgba(255,255,255,0.4);">
+            {% if staff.profile_image %}
+                <img src="{{ staff.profile_image.url }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="">
+            {% else %}
+                👤
+            {% endif %}
+        </div>
+        <h1 style="font-size:1.75rem;font-weight:700;margin-bottom:0.5rem;">
+            {{ staff.user.get_full_name }}
+        </h1>
+        <span style="background:rgba(255,255,255,0.2);padding:0.3rem 1rem;border-radius:9999px;font-size:0.875rem;">
+            {{ staff.specialty.name }}
+        </span>
+        {% if staff.bio %}
+        <p style="margin-top:1rem;opacity:0.85;max-width:500px;margin-left:auto;margin-right:auto;font-size:0.9rem;line-height:1.7;">
+            {{ staff.bio }}
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container" style="margin-top:-3rem;padding-bottom:3rem;">
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;align-items:start;">
+
+        <!-- ستون چپ: برنامه کاری -->
+        <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+            <!-- برنامه هفتگی -->
+            <div class="card">
+                <div class="card-header">📅 ساعات کاری</div>
+                <div class="card-body">
+                    {% for schedule in schedules %}
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid #f8fafc;">
+                        <span style="font-weight:600;font-size:0.875rem;">
+                            {{ schedule.get_day_of_week_display }}
+                        </span>
+                        <span class="badge badge-green" style="font-size:0.72rem;">
+                            {{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}
+                        </span>
+                    </div>
+                    {% empty %}
+                    <p style="text-align:center;color:#94a3b8;font-size:0.875rem;padding:1rem 0;">
+                        برنامه کاری اعلام نشده
+                    </p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- دکمه رزرو سریع -->
+            {% if user.is_authenticated and user.role == 'customer' %}
+            <a href="{% url 'dashboard:customer:appointment_create' %}?staff_id={{ staff.pk }}"
+               class="btn btn-primary btn-block" style="font-size:1rem;padding:0.875rem;">
+                📅 رزرو نوبت با این متخصص
+            </a>
+            {% elif not user.is_authenticated %}
+            <div class="card">
+                <div class="card-body" style="text-align:center;">
+                    <p style="font-size:0.875rem;color:#64748b;margin-bottom:1rem;">
+                        برای رزرو نوبت ابتدا وارد شوید
+                    </p>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-block">
+                        ورود به حساب
+                    </a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-secondary btn-block" style="margin-top:0.5rem;">
+                        ثبت نام
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ستون راست: خدمات -->
+        <div class="card">
+            <div class="card-header">✨ خدمات ارائه‌شده</div>
+            <div class="card-body" style="padding:0;">
+                {% for ss in services %}
+                {% if ss.is_active %}
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid #f8fafc;">
+                    <div style="flex:1;">
+                        <h3 style="font-weight:600;color:#1e293b;margin-bottom:0.25rem;">
+                            {{ ss.service.name }}
+                        </h3>
+                        {% if ss.service.description %}
+                        <p style="font-size:0.8rem;color:#64748b;">{{ ss.service.description }}</p>
+                        {% endif %}
+                        <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+                            <span style="font-size:0.75rem;color:#94a3b8;">
+                                ⏱ {{ ss.service.duration_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="text-align:left;margin-right:1rem;">
+                        <div style="font-size:1rem;font-weight:700;color:#6d28d9;">
+                            {{ ss.service.price|floatformat:0 }}
+                        </div>
+                        <div style="font-size:0.72rem;color:#94a3b8;">تومان</div>
+                    </div>
+                    {% if user.is_authenticated and user.role == 'customer' %}
+                    <a href="{% url 'dashboard:customer:appointment_create' %}?staff_id={{ staff.pk }}"
+                       class="btn btn-primary btn-sm">
+                        رزرو
+                    </a>
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-secondary btn-sm">
+                        ورود
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% empty %}
+                <div style="text-align:center;color:#94a3b8;padding:3rem;">
+                    خدماتی تعریف نشده است
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

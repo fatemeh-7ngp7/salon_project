@@ -1,0 +1,132 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}جزئیات نوبت{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}" class="active">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">جزئیات نوبت</h1>
+    <a href="{% url 'dashboard:owner:appointment_list' %}" class="btn btn-secondary">بازگشت</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+    <div class="card">
+        <div class="card-header">اطلاعات نوبت</div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">مشتری:</span>
+                <strong>{{ appointment.customer.get_full_name }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">کارکن:</span>
+                <strong>{{ appointment.staff.user.get_full_name }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">خدمت:</span>
+                <strong>{{ appointment.service.name }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">تاریخ:</span>
+                <strong>{{ appointment.date }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">ساعت:</span>
+                <strong>{{ appointment.start_time|time:"H:i" }} - {{ appointment.end_time|time:"H:i" }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">قیمت:</span>
+                <strong>{{ appointment.service.price|floatformat:0 }} تومان</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">وضعیت:</span>
+                <span class="badge
+                    {% if appointment.status == 'confirmed' %}badge-green
+                    {% elif appointment.status == 'pending' %}badge-yellow
+                    {% elif appointment.status == 'cancelled' %}badge-red
+                    {% elif appointment.status == 'completed' %}badge-blue
+                    {% else %}badge-gray{% endif %}">
+                    {{ appointment.get_status_display }}
+                </span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">ثبت‌کننده:</span>
+                <strong>{{ appointment.booked_by.get_full_name }}</strong>
+            </div>
+
+            {% if appointment.status == 'cancelled' %}
+            <div style="padding-top:0.75rem;border-top:2px solid #fee2e2;">
+                {% if appointment.cancelled_by %}
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                    <span class="text-gray-500">لغو شده توسط:</span>
+                    <strong style="color:#b91c1c;">{{ appointment.cancelled_by.get_full_name }}</strong>
+                </div>
+                {% endif %}
+                {% if appointment.cancelled_at %}
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                    <span class="text-gray-500">تاریخ لغو:</span>
+                    <strong style="color:#b91c1c;">{{ appointment.cancelled_at|date:"Y/m/d H:i" }}</strong>
+                </div>
+                {% endif %}
+                {% if appointment.cancellation_reason %}
+                <div>
+                    <span class="text-gray-500">دلیل لغو:</span>
+                    <p class="text-sm" style="margin-top:0.25rem;color:#b91c1c;">
+                        {{ appointment.cancellation_reason }}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if appointment.notes %}
+            <div>
+                <span class="text-gray-500">یادداشت:</span>
+                <p class="text-sm" style="margin-top:0.25rem;">{{ appointment.notes }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if appointment.status not in 'cancelled,completed' %}
+    <div class="card">
+        <div class="card-header">عملیات</div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:0.75rem;">
+            {% if appointment.status == 'pending' %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="confirm">
+                <button type="submit" class="btn btn-success btn-block">✅ تأیید نوبت</button>
+            </form>
+            {% endif %}
+            {% if appointment.status == 'confirmed' %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="complete">
+                <button type="submit" class="btn btn-primary btn-block">✔️ انجام شد</button>
+            </form>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="cancel">
+                <div class="form-group">
+                    <label class="form-label">دلیل لغو (اختیاری)</label>
+                    <input type="text" name="reason" class="form-input" placeholder="دلیل لغو...">
+                </div>
+                <button type="submit" class="btn btn-danger btn-block">❌ لغو نوبت</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}همه نوبت‌ها{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">خدمات</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:category_list' %}">📂 دسته‌بندی‌ها</a></li>
+    <li><a href="{% url 'dashboard:owner:service_list' %}">✨ خدمات</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}" class="active">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">همه نوبت‌ها</h1>
+    <a href="{% url 'dashboard:owner:appointment_create' %}" class="btn btn-primary">➕ ثبت نوبت جدید</a>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>مشتری</th>
+                <th>کارکن</th>
+                <th>خدمت</th>
+                <th>تاریخ</th>
+                <th>ساعت</th>
+                <th>وضعیت</th>
+                <th>ثبت‌کننده</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for apt in appointments %}
+            <tr>
+                <td>{{ apt.customer.get_full_name }}</td>
+                <td>{{ apt.staff.user.get_full_name }}</td>
+                <td>{{ apt.service.name }}</td>
+                <td>{{ apt.date }}</td>
+                <td>{{ apt.start_time|time:"H:i" }} - {{ apt.end_time|time:"H:i" }}</td>
+                <td>
+                    <span class="badge
+                        {% if apt.status == 'confirmed' %}badge-green
+                        {% elif apt.status == 'pending' %}badge-yellow
+                        {% elif apt.status == 'cancelled' %}badge-red
+                        {% elif apt.status == 'completed' %}badge-blue
+                        {% else %}badge-gray{% endif %}">
+                        {{ apt.get_status_display }}
+                    </span>
+                </td>
+                <td class="text-sm text-gray-500">{{ apt.booked_by.get_full_name }}</td>
+                <td>
+                    <a href="{% url 'dashboard:owner:appointment_detail' apt.pk %}"
+                       class="btn btn-secondary btn-sm">جزئیات</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem;">نوبتی ثبت نشده</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

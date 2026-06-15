@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}صفحه اصلی - سالن آرایشی{% endblock %}
+
+{% block content %}
+
+<div class="hero">
+    <div style="max-width:42rem;margin:0 auto;">
+        <h1>به سالن آرایشی ما خوش آمدید 💇‍♀️</h1>
+        <p>با متخصص‌ترین کادر آرایشی، بهترین تجربه زیبایی را داشته باشید</p>
+        <div class="hero-buttons">
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard:customer:appointment_create' %}" class="btn btn-outline">رزرو نوبت</a>
+            {% else %}
+                <a href="{% url 'accounts:register' %}" class="btn" style="background:white;color:#6d28d9;font-weight:700;">ثبت نام و رزرو نوبت</a>
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline">ورود به حساب</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- خدمات -->
+<div class="section" style="background:white;">
+    <div class="container">
+        <h2 class="section-title">خدمات ما</h2>
+        <p class="section-subtitle">انواع خدمات تخصصی آرایشی</p>
+        <div class="grid grid-4" style="gap:1.5rem;">
+            {% for category in categories %}
+            <a href="{% url 'public:services' %}?category={{ category.id }}"
+               class="card card-hover" style="text-align:center;padding:1.5rem;text-decoration:none;color:inherit;">
+                <div class="gradient-pink" style="width:3.5rem;height:3.5rem;border-radius:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.5rem;">
+                    {% if category.icon %}{{ category.icon }}{% else %}✨{% endif %}
+                </div>
+                <h3 class="font-semibold text-gray-800">{{ category.name }}</h3>
+                <p class="text-sm text-gray-500" style="margin-top:0.25rem;">{{ category.services.count }} خدمت</p>
+            </a>
+            {% empty %}
+            <div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:2rem;">خدماتی ثبت نشده است</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- کارکنان -->
+<div class="section" style="background:#f8fafc;">
+    <div class="container">
+        <h2 class="section-title">متخصصین ما</h2>
+        <p class="section-subtitle">با کادر حرفه‌ای ما آشنا شوید</p>
+        <div class="grid grid-3" style="gap:2rem;">
+            {% for member in staff_members %}
+            <div class="staff-card card-hover">
+                <div class="staff-card-header">
+                    <div class="staff-avatar">
+                        {% if member.profile_image %}
+                            <img src="{{ member.profile_image.url }}" alt="{{ member.user.get_full_name }}">
+                        {% else %}👤{% endif %}
+                    </div>
+                </div>
+                <div class="staff-card-body">
+                    <h3 class="font-bold text-lg text-gray-800">{{ member.user.get_full_name }}</h3>
+                    <span class="badge badge-purple" style="margin-top:0.25rem;">{{ member.specialty.name }}</span>
+                    {% if member.bio %}
+                    <p class="text-sm text-gray-500" style="margin-top:0.75rem;">{{ member.bio }}</p>
+                    {% endif %}
+                    <a href="{% url 'public:staff_detail' member.pk %}"
+                       class="btn btn-primary btn-block" style="margin-top:1rem;">
+                        مشاهده و رزرو نوبت
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:2rem;">کارکنی ثبت نشده است</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ویژگی‌ها -->
+<div class="section" style="background:white;">
+    <div class="container">
+        <div class="grid grid-3" style="gap:2rem;text-align:center;">
+            <div style="padding:1.5rem;">
+                <div class="gradient-pink" style="width:4rem;height:4rem;border-radius:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.75rem;">⭐</div>
+                <h3 class="font-bold text-lg" style="margin-bottom:0.5rem;">متخصصین حرفه‌ای</h3>
+                <p class="text-gray-500 text-sm">کادری با سال‌ها تجربه در خدمت شما</p>
+            </div>
+            <div style="padding:1.5rem;">
+                <div class="gradient-primary" style="width:4rem;height:4rem;border-radius:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.75rem;">📅</div>
+                <h3 class="font-bold text-lg" style="margin-bottom:0.5rem;">رزرو آنلاین آسان</h3>
+                <p class="text-gray-500 text-sm">نوبت خود را به راحتی آنلاین رزرو کنید</p>
+            </div>
+            <div style="padding:1.5rem;">
+                <div style="background:linear-gradient(135deg,#4ade80,#14b8a6);width:4rem;height:4rem;border-radius:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.75rem;">✨</div>
+                <h3 class="font-bold text-lg" style="margin-bottom:0.5rem;">محصولات با کیفیت</h3>
+                <p class="text-gray-500 text-sm">استفاده از بهترین برندهای آرایشی</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

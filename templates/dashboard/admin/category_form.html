@@ -1,0 +1,59 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}دسته‌بندی جدید{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">خدمات</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:category_list' %}" class="active">📂 دسته‌بندی‌ها</a></li>
+    <li><a href="{% url 'dashboard:owner:service_list' %}">✨ خدمات</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">افزودن دسته‌بندی جدید</h1>
+    <a href="{% url 'dashboard:owner:category_list' %}" class="btn btn-secondary">بازگشت</a>
+</div>
+
+<div class="card" style="max-width:500px;">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">نام دسته‌بندی *</label>
+                <input type="text" name="name" class="form-input"
+                       placeholder="مثال: مو، ناخن، پوست" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">آیکون (اموجی)</label>
+                <input type="text" name="icon" class="form-input"
+                       placeholder="مثال: 💇 یا 💅">
+                <small style="color:#94a3b8;font-size:0.75rem;">یک اموجی مناسب وارد کنید</small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">توضیحات</label>
+                <textarea name="description" class="form-input" rows="3"
+                          placeholder="توضیح کوتاهی درباره این دسته‌بندی"></textarea>
+            </div>
+
+            <div style="display:flex;gap:1rem;margin-top:1.5rem;">
+                <button type="submit" class="btn btn-primary">ذخیره دسته‌بندی</button>
+                <a href="{% url 'dashboard:owner:category_list' %}" class="btn btn-secondary">انصراف</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

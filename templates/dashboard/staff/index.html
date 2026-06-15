@@ -1,0 +1,96 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}پنل کارکن{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">منو</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:staff:index' %}" class="active">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:staff:schedule' %}">📋 برنامه کاری من</a></li>
+    <li><a href="{% url 'dashboard:staff:appointment_list' %}">📅 نوبت‌های من</a></li>
+    <li><a href="{% url 'dashboard:staff:appointment_create' %}">➕ ثبت نوبت</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">پنل کارکن</h1>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon gradient-primary">📅</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ today_appointments }}</div>
+            <div class="stat-label">نوبت‌های امروز</div>
+        </div>
+    </div>
+
+    <!-- کارت تخصص و خدمات -->
+    <div class="card" style="grid-column: span 2; padding: 1.25rem 1.5rem;">
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+            <div>
+                <p class="text-sm text-gray-500" style="margin-bottom:0.35rem;">تخصص:</p>
+                <span class="badge badge-purple" style="font-size:0.85rem;padding:0.3rem 0.8rem;">
+                    {{ staff.specialty.name }}
+                </span>
+            </div>
+            <div style="width:1px;height:2.5rem;background:#e2e8f0;"></div>
+            <div style="flex:1;">
+                <p class="text-sm text-gray-500" style="margin-bottom:0.35rem;">خدمات من:</p>
+                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+                    {% for ss in staff.staff_services.all %}
+                    {% if ss.is_active %}
+                    <span style="display:inline-flex;align-items:center;gap:0.3rem;background:#f5f3ff;color:#6d28d9;padding:0.25rem 0.7rem;border-radius:9999px;font-size:0.78rem;font-weight:500;">
+                        {{ ss.service.name }}
+                        <span style="color:#94a3b8;font-size:0.7rem;">({{ ss.service.duration_display }})</span>
+                    </span>
+                    {% endif %}
+                    {% empty %}
+                    <span class="text-sm text-gray-400">خدماتی تعریف نشده</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if upcoming_appointments %}
+<div class="card">
+    <div class="card-header">نوبت‌های پیش رو</div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>مشتری</th>
+                    <th>خدمت</th>
+                    <th>تاریخ</th>
+                    <th>ساعت</th>
+                    <th>وضعیت</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apt in upcoming_appointments %}
+                <tr>
+                    <td>{{ apt.customer.get_full_name }}</td>
+                    <td>{{ apt.service.name }}</td>
+                    <td>{{ apt.date }}</td>
+                    <td>{{ apt.start_time|time:"H:i" }}</td>
+                    <td>
+                        <span class="badge {% if apt.status == 'confirmed' %}badge-green{% elif apt.status == 'pending' %}badge-yellow{% else %}badge-gray{% endif %}">
+                            {{ apt.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body" style="text-align:center;color:#94a3b8;padding:3rem;">
+        📅 نوبت پیش رویی وجود ندارد
+    </div>
+</div>
+{% endif %}
+{% endblock %}

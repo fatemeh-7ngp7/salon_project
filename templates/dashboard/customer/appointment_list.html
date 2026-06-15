@@ -1,0 +1,87 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}نوبت‌های من{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">منو</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:customer:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:customer:appointment_list' %}" class="active">📅 نوبت‌های من</a></li>
+    <li><a href="{% url 'dashboard:customer:appointment_create' %}">➕ رزرو نوبت</a></li>
+    <li><a href="{% url 'dashboard:customer:profile' %}">👤 پروفایل</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">نوبت‌های من</h1>
+    <a href="{% url 'dashboard:customer:appointment_create' %}" class="btn btn-primary">➕ رزرو نوبت جدید</a>
+</div>
+
+{% if appointments %}
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>خدمت</th>
+                <th>کارکن</th>
+                <th>تاریخ</th>
+                <th>ساعت</th>
+                <th>قیمت</th>
+                <th>وضعیت</th>
+                <th>ثبت‌کننده</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for apt in appointments %}
+            <tr>
+                <td><strong>{{ apt.service.name }}</strong></td>
+                <td>{{ apt.staff.user.get_full_name }}</td>
+                <td>{{ apt.date }}</td>
+                <td>{{ apt.start_time|time:"H:i" }} - {{ apt.end_time|time:"H:i" }}</td>
+                <td>{{ apt.service.price|floatformat:0 }} تومان</td>
+                <td>
+                    <span class="badge
+                        {% if apt.status == 'confirmed' %}badge-green
+                        {% elif apt.status == 'pending' %}badge-yellow
+                        {% elif apt.status == 'cancelled' %}badge-red
+                        {% elif apt.status == 'completed' %}badge-blue
+                        {% else %}badge-gray{% endif %}">
+                        {{ apt.get_status_display }}
+                    </span>
+                </td>
+                <td class="text-sm text-gray-500">
+                    {% if apt.booked_by == request.user %}خودم
+                    {% else %}{{ apt.booked_by.get_full_name }}{% endif %}
+                </td>
+                <td style="display:flex;gap:0.5rem;">
+                    <a href="{% url 'dashboard:customer:appointment_detail' apt.pk %}"
+                       class="btn btn-secondary btn-sm">جزئیات</a>
+                    {% if apt.is_cancellable %}
+                    <form method="post" action="{% url 'dashboard:customer:appointment_cancel' apt.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('آیا مطمئن هستید؟')">لغو</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body" style="text-align:center;padding:4rem;">
+        <div style="font-size:4rem;margin-bottom:1rem;">📅</div>
+        <h3 class="font-bold text-lg" style="margin-bottom:0.5rem;">هنوز نوبتی رزرو نکرده‌اید</h3>
+        <p class="text-gray-500 text-sm" style="margin-bottom:1.5rem;">
+            اولین نوبت خود را همین الان رزرو کنید
+        </p>
+        <a href="{% url 'dashboard:customer:appointment_create' %}" class="btn btn-primary">
+            ➕ رزرو اولین نوبت
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

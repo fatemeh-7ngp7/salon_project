@@ -1,0 +1,77 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}پنل مدیریت{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}" class="active">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">خدمات</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:category_list' %}">📂 دسته‌بندی‌ها</a></li>
+    <li><a href="{% url 'dashboard:owner:service_list' %}">✨ خدمات</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">داشبورد مدیریت</h1>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon gradient-primary">💇</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ total_staff }}</div>
+            <div class="stat-label">کارکنان فعال</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon gradient-pink">👥</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ total_customers }}</div>
+            <div class="stat-label">مشتریان</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#4ade80,#14b8a6);">📅</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ today_appointments }}</div>
+            <div class="stat-label">نوبت‌های فعال</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">✨</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ total_services }}</div>
+            <div class="stat-label">خدمات فعال</div>
+        </div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+    <div class="card">
+        <div class="card-header">دسترسی سریع</div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:0.75rem;">
+            <a href="{% url 'dashboard:owner:user_create' %}" class="btn btn-primary">➕ افزودن کاربر جدید</a>
+            <a href="{% url 'dashboard:owner:staff_create' %}" class="btn btn-secondary">➕ افزودن کارکن</a>
+            <a href="{% url 'dashboard:owner:service_create' %}" class="btn btn-secondary">➕ افزودن خدمت</a>
+            <a href="{% url 'dashboard:owner:category_create' %}" class="btn btn-secondary">➕ افزودن دسته‌بندی</a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">اطلاعات سیستم</div>
+        <div class="card-body">
+            <p class="text-sm text-gray-500" style="margin-bottom:0.5rem;">نقش: <strong>صاحب سالن</strong></p>
+            <p class="text-sm text-gray-500" style="margin-bottom:0.5rem;">شماره: <strong>{{ request.user.phone }}</strong></p>
+            <p class="text-sm text-gray-500">عضویت از: <strong>{{ request.user.date_joined|date:"Y/m/d" }}</strong></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}سالن آرایشی{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="{% url 'public:home' %}" class="flex items-center gap-2" style="text-decoration:none;">
+            <div class="gradient-pink" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;display:flex;align-items:center;justify-content:center;">
+                <span style="font-size:1.2rem;">💇</span>
+            </div>
+            <span class="font-bold text-lg text-gray-800">سالن آرایشی</span>
+        </a>
+
+        <div class="nav-links">
+            <a href="{% url 'public:home' %}" class="text-gray-600 font-medium" style="text-decoration:none;">خانه</a>
+            <a href="{% url 'public:services' %}" class="text-gray-600 font-medium" style="text-decoration:none;">خدمات</a>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard:index' %}" class="text-gray-600 font-medium" style="text-decoration:none;">پنل کاربری</a>
+                <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary btn-sm">خروج</button>
+                </form>
+            {% else %}
+                <a href="{% url 'accounts:login' %}" class="text-gray-600 font-medium" style="text-decoration:none;">ورود</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">ثبت نام</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+{% if messages %}
+<div class="container" style="margin-top:1rem;">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+    <div class="footer-inner">
+        <div>
+            <div class="flex items-center gap-2" style="margin-bottom:1rem;">
+                <div class="gradient-pink" style="width:2rem;height:2rem;border-radius:0.5rem;display:flex;align-items:center;justify-content:center;">
+                    <span>💇</span>
+                </div>
+                <span class="font-bold" style="color:white;">سالن آرایشی</span>
+            </div>
+            <p class="text-sm">ارائه بهترین خدمات آرایشی با کادری مجرب</p>
+        </div>
+        <div>
+            <h3 class="font-semibold" style="color:white;margin-bottom:0.75rem;">دسترسی سریع</h3>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:0.5rem;">
+                <li><a href="{% url 'public:home' %}">خانه</a></li>
+                <li><a href="{% url 'public:services' %}">خدمات</a></li>
+                <li><a href="{% url 'accounts:login' %}">ورود</a></li>
+            </ul>
+        </div>
+        <div>
+            <h3 class="font-semibold" style="color:white;margin-bottom:0.75rem;">تماس با ما</h3>
+            <p class="text-sm">تهران، خیابان ولیعصر</p>
+            <p class="text-sm" style="margin-top:0.25rem;">021-12345678</p>
+        </div>
+    </div>
+    <div class="footer-bottom">تمامی حقوق محفوظ است © ۱۴۰۳</div>
+</footer>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

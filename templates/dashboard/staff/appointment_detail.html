@@ -1,0 +1,89 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}جزئیات نوبت{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">منو</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:staff:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:staff:schedule' %}">📋 برنامه کاری من</a></li>
+    <li><a href="{% url 'dashboard:staff:appointment_list' %}" class="active">📅 نوبت‌های من</a></li>
+    <li><a href="{% url 'dashboard:staff:appointment_create' %}">➕ ثبت نوبت</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">جزئیات نوبت</h1>
+    <a href="{% url 'dashboard:staff:appointment_list' %}" class="btn btn-secondary">بازگشت</a>
+</div>
+
+<div class="card" style="max-width:550px;">
+    <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">
+        اطلاعات نوبت
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:0.875rem;">
+        <div style="display:flex;justify-content:space-between;">
+            <span class="text-gray-500">مشتری:</span>
+            <strong>{{ appointment.customer.get_full_name }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+            <span class="text-gray-500">موبایل مشتری:</span>
+            <strong style="direction:ltr;">{{ appointment.customer.phone }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+            <span class="text-gray-500">خدمت:</span>
+            <strong>{{ appointment.service.name }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+            <span class="text-gray-500">مدت زمان:</span>
+            <strong>{{ appointment.service.duration_display }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+            <span class="text-gray-500">تاریخ:</span>
+            <strong>{{ appointment.date }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+            <span class="text-gray-500">ساعت:</span>
+            <strong>{{ appointment.start_time|time:"H:i" }} - {{ appointment.end_time|time:"H:i" }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+            <span class="text-gray-500">قیمت:</span>
+            <strong style="color:#6d28d9;">{{ appointment.service.price|floatformat:0 }} تومان</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+            <span class="text-gray-500">وضعیت:</span>
+            <span class="badge
+                {% if appointment.status == 'confirmed' %}badge-green
+                {% elif appointment.status == 'pending' %}badge-yellow
+                {% elif appointment.status == 'cancelled' %}badge-red
+                {% elif appointment.status == 'completed' %}badge-blue
+                {% else %}badge-gray{% endif %}">
+                {{ appointment.get_status_display }}
+            </span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+            <span class="text-gray-500">ثبت‌کننده:</span>
+            <strong>{{ appointment.booked_by.get_full_name }}</strong>
+        </div>
+        {% if appointment.notes %}
+        <div style="padding-top:0.75rem;border-top:1px solid #f1f5f9;">
+            <span class="text-gray-500 text-sm">یادداشت:</span>
+            <p class="text-sm" style="margin-top:0.25rem;">{{ appointment.notes }}</p>
+        </div>
+        {% endif %}
+        {% if appointment.status == 'cancelled' and appointment.cancelled_by %}
+        <div style="padding-top:0.75rem;border-top:2px solid #fee2e2;">
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">لغو شده توسط:</span>
+                <strong style="color:#b91c1c;">{{ appointment.cancelled_by.get_full_name }}</strong>
+            </div>
+            {% if appointment.cancellation_reason %}
+            <p class="text-sm" style="margin-top:0.25rem;color:#b91c1c;">
+                دلیل: {{ appointment.cancellation_reason }}
+            </p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

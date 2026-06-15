@@ -1,0 +1,74 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}نوبت‌های من{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">منو</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:staff:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:staff:schedule' %}">📋 برنامه کاری من</a></li>
+    <li><a href="{% url 'dashboard:staff:appointment_list' %}" class="active">📅 نوبت‌های من</a></li>
+    <li><a href="{% url 'dashboard:staff:appointment_create' %}">➕ ثبت نوبت</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">نوبت‌های من</h1>
+    <a href="{% url 'dashboard:staff:appointment_create' %}" class="btn btn-primary">➕ ثبت نوبت</a>
+</div>
+
+{% if appointments %}
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>مشتری</th>
+                <th>خدمت</th>
+                <th>تاریخ</th>
+                <th>ساعت</th>
+                <th>وضعیت</th>
+                <th>ثبت‌کننده</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for apt in appointments %}
+            <tr>
+                <td>
+                    <strong>{{ apt.customer.get_full_name }}</strong>
+                    <div style="font-size:0.75rem;color:#94a3b8;direction:ltr;">
+                        {{ apt.customer.phone }}
+                    </div>
+                </td>
+                <td>{{ apt.service.name }}</td>
+                <td>{{ apt.date }}</td>
+                <td>{{ apt.start_time|time:"H:i" }} - {{ apt.end_time|time:"H:i" }}</td>
+                <td>
+                    <span class="badge
+                        {% if apt.status == 'confirmed' %}badge-green
+                        {% elif apt.status == 'pending' %}badge-yellow
+                        {% elif apt.status == 'cancelled' %}badge-red
+                        {% elif apt.status == 'completed' %}badge-blue
+                        {% else %}badge-gray{% endif %}">
+                        {{ apt.get_status_display }}
+                    </span>
+                </td>
+                <td class="text-sm text-gray-500">{{ apt.booked_by.get_full_name }}</td>
+                <td>
+                    <a href="{% url 'dashboard:staff:appointment_detail' apt.pk %}"
+                       class="btn btn-secondary btn-sm">جزئیات</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body" style="text-align:center;padding:3rem;">
+        <div style="font-size:3rem;margin-bottom:1rem;">📅</div>
+        <p class="text-gray-500">نوبتی ثبت نشده است</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

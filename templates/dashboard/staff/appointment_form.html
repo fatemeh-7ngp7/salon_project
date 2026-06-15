@@ -1,0 +1,226 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}ثبت نوبت{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">منو</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:staff:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:staff:schedule' %}">📋 برنامه کاری من</a></li>
+    <li><a href="{% url 'dashboard:staff:appointment_list' %}">📅 نوبت‌های من</a></li>
+    <li><a href="{% url 'dashboard:staff:appointment_create' %}" class="active">➕ ثبت نوبت</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">ثبت نوبت برای مشتری</h1>
+    <a href="{% url 'dashboard:staff:appointment_list' %}" class="btn btn-secondary">بازگشت</a>
+</div>
+
+<div class="alert alert-info" style="max-width:650px;margin-bottom:1rem;">
+    💡 شما فقط می‌توانید برای خودتان نوبت ثبت کنید.
+    خدمت انتخابی باید در حوزه تخصص شما باشد.
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;">
+    <div class="card">
+        <div class="card-header">مشخصات نوبت</div>
+        <div class="card-body">
+            <form method="post" id="appointmentForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">مشتری *</label>
+                    <select name="customer" class="form-input" id="customerSelect" required>
+                        <option value="">انتخاب مشتری...</option>
+                        {% for customer in customers %}
+                        <option value="{{ customer.pk }}">
+                            {{ customer.get_full_name }} - {{ customer.phone }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- کارکن ثابته - فقط خودم -->
+                <div class="form-group">
+                    <label class="form-label">کارکن</label>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.75rem;padding:0.75rem 1rem;font-weight:600;color:#334155;">
+                        {{ staff.user.get_full_name }} (من)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">خدمت *</label>
+                    <select name="service" class="form-input" id="serviceSelect" required>
+                        <option value="">انتخاب خدمت...</option>
+                        {% for ss in services %}
+                        <option value="{{ ss.service.pk }}"
+                                data-duration="{{ ss.service.duration_display }}"
+                                data-price="{{ ss.service.price }}"
+                                data-name="{{ ss.service.name }}">
+                            {{ ss.service.name }} ({{ ss.service.duration_display }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="serviceInfo" style="display:none;background:#f5f3ff;border-radius:0.75rem;padding:0.875rem;margin-bottom:1rem;font-size:0.875rem;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+                        <span class="text-gray-600">مدت زمان:</span>
+                        <strong id="serviceDuration">-</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span class="text-gray-600">قیمت:</span>
+                        <strong id="servicePrice" style="color:#6d28d9;">-</strong>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">تاریخ *</label>
+                    <input type="date" name="date" class="form-input" id="dateInput"
+                           min="{{ today }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ساعت *</label>
+                    <div id="slotsContainer">
+                        <p class="text-sm text-gray-400" style="padding:0.75rem;text-align:center;background:#f8fafc;border-radius:0.75rem;">
+                            ابتدا خدمت و تاریخ را انتخاب کنید
+                        </p>
+                    </div>
+                    <input type="hidden" name="start_time" id="selectedTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">یادداشت</label>
+                    <textarea name="notes" class="form-input" rows="2"
+                              placeholder="یادداشت اختیاری..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%;"
+                        id="submitBtn" disabled>✅ ثبت نوبت</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card" id="selectedSummary" style="display:none;">
+        <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">
+            ✅ خلاصه نوبت
+        </div>
+        <div class="card-body" style="font-size:0.875rem;display:flex;flex-direction:column;gap:0.5rem;">
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">مشتری:</span>
+                <strong id="summaryCustomer">-</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">خدمت:</span>
+                <strong id="summaryService">-</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">تاریخ:</span>
+                <strong id="summaryDate">-</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">ساعت:</span>
+                <strong id="summaryTime">-</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">قیمت:</span>
+                <strong id="summaryPrice" style="color:#6d28d9;">-</strong>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const STAFF_ID = "{{ staff.pk }}";
+let selectedServicePrice = '';
+let selectedServiceName = '';
+
+document.getElementById('serviceSelect').addEventListener('change', function() {
+    const opt = this.options[this.selectedIndex];
+    if (this.value) {
+        document.getElementById('serviceInfo').style.display = 'block';
+        document.getElementById('serviceDuration').textContent = opt.dataset.duration;
+        document.getElementById('servicePrice').textContent =
+            Number(opt.dataset.price).toLocaleString() + ' تومان';
+        selectedServiceName = opt.dataset.name;
+        selectedServicePrice = Number(opt.dataset.price).toLocaleString() + ' تومان';
+    } else {
+        document.getElementById('serviceInfo').style.display = 'none';
+    }
+    loadSlots();
+});
+
+document.getElementById('dateInput').addEventListener('change', loadSlots);
+document.getElementById('customerSelect').addEventListener('change', function() {
+    loadSlots();
+});
+
+function loadSlots() {
+    const serviceId = document.getElementById('serviceSelect').value;
+    const date = document.getElementById('dateInput').value;
+    const customerId = document.getElementById('customerSelect').value;
+
+    document.getElementById('selectedTime').value = '';
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('selectedSummary').style.display = 'none';
+
+    if (!serviceId || !date) return;
+
+    const container = document.getElementById('slotsContainer');
+    container.innerHTML = '<p class="text-sm text-gray-400" style="padding:0.75rem;text-align:center;">در حال بارگذاری...</p>';
+
+    let url = `/appointments/api/available-slots/?staff_id=${STAFF_ID}&service_id=${serviceId}&date=${date}`;
+    if (customerId) url += `&customer_id=${customerId}`;
+
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                container.innerHTML = `<p class="text-sm" style="padding:0.75rem;text-align:center;color:#ef4444;">${data.error}</p>`;
+                return;
+            }
+            if (data.slots.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400" style="padding:0.75rem;text-align:center;background:#f8fafc;border-radius:0.75rem;">زمان خالی در این تاریخ وجود ندارد</p>';
+                return;
+            }
+            container.innerHTML = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;">' +
+                data.slots.map(slot => `
+                    <button type="button"
+                            onclick="selectSlot('${slot.value}', '${slot.start} - ${slot.end}')"
+                            class="slot-btn"
+                            style="padding:0.5rem;border:2px solid #e2e8f0;border-radius:0.625rem;background:white;cursor:pointer;font-size:0.8rem;font-family:inherit;transition:all 0.15s;">
+                        ${slot.start}
+                    </button>
+                `).join('') + '</div>';
+        });
+}
+
+function selectSlot(value, label) {
+    document.querySelectorAll('.slot-btn').forEach(btn => {
+        btn.style.background = 'white';
+        btn.style.borderColor = '#e2e8f0';
+        btn.style.color = '#1e293b';
+    });
+    event.target.style.background = 'linear-gradient(135deg,#667eea,#764ba2)';
+    event.target.style.borderColor = '#667eea';
+    event.target.style.color = 'white';
+
+    document.getElementById('selectedTime').value = value;
+    document.getElementById('submitBtn').disabled = false;
+
+    const customerSelect = document.getElementById('customerSelect');
+    document.getElementById('selectedSummary').style.display = 'block';
+    document.getElementById('summaryCustomer').textContent =
+        customerSelect.options[customerSelect.selectedIndex].text || '-';
+    document.getElementById('summaryService').textContent = selectedServiceName;
+    document.getElementById('summaryDate').textContent =
+        document.getElementById('dateInput').value;
+    document.getElementById('summaryTime').textContent = label;
+    document.getElementById('summaryPrice').textContent = selectedServicePrice;
+}
+</script>
+{% endblock %}

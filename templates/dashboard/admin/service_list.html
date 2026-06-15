@@ -1,0 +1,66 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}خدمات{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">خدمات</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:category_list' %}">📂 دسته‌بندی‌ها</a></li>
+    <li><a href="{% url 'dashboard:owner:service_list' %}" class="active">✨ خدمات</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">مدیریت خدمات</h1>
+    <a href="{% url 'dashboard:owner:service_create' %}" class="btn btn-primary">➕ خدمت جدید</a>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>نام خدمت</th>
+                <th>دسته‌بندی</th>
+                <th>مدت زمان</th>
+                <th>قیمت (تومان)</th>
+                <th>وضعیت</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+            <tr>
+                <td><strong>{{ service.name }}</strong></td>
+                <td><span class="badge badge-purple">{{ service.category.name }}</span></td>
+                <td>{{ service.duration_display }}</td>
+                <td>{{ service.price|floatformat:0 }} تومان</td>
+                <td>
+                    <span class="badge {% if service.is_active %}badge-green{% else %}badge-red{% endif %}">
+                        {% if service.is_active %}فعال{% else %}غیرفعال{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'dashboard:owner:service_edit' service.pk %}" class="btn btn-secondary btn-sm">ویرایش</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">
+                    خدماتی ثبت نشده است
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}پنل کاربری{% endblock %} - سالن آرایشی</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="{% url 'public:home' %}" style="text-decoration:none;display:flex;align-items:center;gap:0.5rem;">
+            <div class="gradient-pink" style="width:2.25rem;height:2.25rem;border-radius:0.75rem;display:flex;align-items:center;justify-content:center;">
+                <span style="font-size:1.2rem;">💇</span>
+            </div>
+            <span class="font-bold text-lg text-gray-800">سالن آرایشی</span>
+        </a>
+        <div class="nav-links">
+            <span class="text-sm text-gray-500">
+                خوش آمدید، <strong>{{ request.user.get_full_name }}</strong>
+            </span>
+            <a href="{% url 'public:home' %}" class="text-gray-600 text-sm" style="text-decoration:none;">سایت</a>
+            <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary btn-sm">خروج</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+{% if messages %}
+<div style="padding:1rem 2rem 0;">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div style="margin-bottom:1.5rem;padding:1rem;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:0.875rem;color:white;text-align:center;">
+            <div style="width:3rem;height:3rem;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;font-size:1.25rem;">
+                👤
+            </div>
+            <div class="font-semibold text-sm">{{ request.user.get_full_name }}</div>
+            <div style="font-size:0.7rem;opacity:0.8;margin-top:0.2rem;">
+                {% if request.user.role == 'owner' %}صاحب سالن
+                {% elif request.user.role == 'receptionist' %}منشی
+                {% elif request.user.role == 'staff' %}کارکن
+                {% else %}مشتری{% endif %}
+            </div>
+        </div>
+
+        {% block sidebar %}{% endblock %}
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+</div>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

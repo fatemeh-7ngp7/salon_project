@@ -1,0 +1,69 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}برنامه کاری منشی{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}" class="active">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">خدمات</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:category_list' %}">📂 دسته‌بندی‌ها</a></li>
+    <li><a href="{% url 'dashboard:owner:service_list' %}">✨ خدمات</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">برنامه کاری - {{ receptionist.get_full_name }}</h1>
+    <a href="{% url 'dashboard:owner:staff_list' %}" class="btn btn-secondary">بازگشت</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+    <div class="card">
+        <div class="card-header">اطلاعات منشی</div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">نام:</span>
+                <strong>{{ receptionist.get_full_name }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">موبایل:</span>
+                <strong>{{ receptionist.phone }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500">وضعیت:</span>
+                <span class="badge {% if receptionist.is_active %}badge-green{% else %}badge-red{% endif %}">
+                    {% if receptionist.is_active %}فعال{% else %}غیرفعال{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">یادداشت برنامه کاری</div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">برنامه کاری هفتگی</label>
+                    <textarea name="work_note" class="form-input" rows="8"
+                              placeholder="مثال:&#10;شنبه: ۹ صبح تا ۶ عصر&#10;یکشنبه: ۹ صبح تا ۶ عصر&#10;دوشنبه: تعطیل&#10;...">{{ receptionist.work_note }}</textarea>
+                    <small style="color:#94a3b8;font-size:0.75rem;">
+                        برنامه کاری هفتگی منشی را به صورت متن وارد کنید
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">
+                    ذخیره برنامه کاری
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

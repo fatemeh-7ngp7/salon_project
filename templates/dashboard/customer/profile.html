@@ -1,0 +1,51 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}پروفایل{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">منو</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:customer:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:customer:appointment_list' %}">📅 نوبت‌های من</a></li>
+    <li><a href="{% url 'dashboard:customer:appointment_create' %}">➕ رزرو نوبت</a></li>
+    <li><a href="{% url 'dashboard:customer:profile' %}" class="active">👤 پروفایل</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">پروفایل من</h1>
+</div>
+
+<div class="card" style="max-width:500px;">
+    <div class="card-body">
+        <div style="text-align:center;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid #f1f5f9;">
+            <div style="width:5rem;height:5rem;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2rem;">
+                👤
+            </div>
+            <h2 class="font-bold text-xl">{{ request.user.get_full_name }}</h2>
+            <span class="badge badge-gray" style="margin-top:0.5rem;">مشتری</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:0.875rem;">
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500 text-sm">شماره موبایل:</span>
+                <strong style="direction:ltr;">{{ request.user.phone }}</strong>
+            </div>
+            {% if request.user.email %}
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500 text-sm">ایمیل:</span>
+                <strong>{{ request.user.email }}</strong>
+            </div>
+            {% endif %}
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500 text-sm">تاریخ عضویت:</span>
+                <strong>{{ request.user.date_joined|date:"Y/m/d" }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span class="text-gray-500 text-sm">تعداد نوبت‌ها:</span>
+                <strong>{{ appointments_count }} نوبت</strong>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}برنامه کارکنان{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">منو</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:receptionist:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:receptionist:appointment_list' %}">📅 نوبت‌ها</a></li>
+    <li><a href="{% url 'dashboard:receptionist:appointment_create' %}">➕ نوبت جدید</a></li>
+    <li><a href="{% url 'dashboard:receptionist:staff_schedule' %}" class="active">📋 برنامه کارکنان</a></li>
+    <li><a href="{% url 'dashboard:receptionist:customer_list' %}">👥 مشتریان</a></li>
+    <li><a href="{% url 'dashboard:receptionist:customer_create' %}">➕ مشتری جدید</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">برنامه کاری کارکنان</h1>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem;">
+    {% for member in staff_members %}
+    <div class="card">
+        <div class="card-header" style="display:flex;align-items:center;gap:0.75rem;">
+            <div style="width:2.5rem;height:2.5rem;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:1rem;flex-shrink:0;">
+                👤
+            </div>
+            <div>
+                <div class="font-semibold">{{ member.user.get_full_name }}</div>
+                <span class="badge badge-purple" style="font-size:0.65rem;">
+                    {{ member.specialty.name }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+
+            <!-- خدمات کارکن -->
+            <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #f1f5f9;">
+                <p class="text-sm font-semibold text-gray-600" style="margin-bottom:0.5rem;">✨ خدمات:</p>
+                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+                    {% for ss in member.staff_services.all %}
+                    {% if ss.is_active %}
+                    <span style="display:inline-flex;align-items:center;gap:0.3rem;background:#f5f3ff;color:#6d28d9;padding:0.2rem 0.6rem;border-radius:9999px;font-size:0.72rem;font-weight:500;">
+                        {{ ss.service.name }}
+                        <span style="color:#94a3b8;font-size:0.65rem;">({{ ss.service.duration_display }})</span>
+                    </span>
+                    {% endif %}
+                    {% empty %}
+                    <span class="text-sm text-gray-400">خدماتی تعریف نشده</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- برنامه کاری هفتگی -->
+            <p class="text-sm font-semibold text-gray-600" style="margin-bottom:0.5rem;">📅 ساعات کاری:</p>
+            {% for schedule in member.work_schedules.all %}
+            <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #f8fafc;">
+                <span class="font-medium text-sm">{{ schedule.get_day_of_week_display }}</span>
+                <span class="text-sm text-gray-500">
+                    {{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}
+                </span>
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-400" style="text-align:center;padding:0.5rem 0;">
+                برنامه کاری تعریف نشده
+            </p>
+            {% endfor %}
+
+            <!-- دکمه رزرو سریع -->
+            <a href="{% url 'dashboard:receptionist:appointment_create' %}?staff={{ member.pk }}"
+               class="btn btn-primary btn-sm btn-block" style="margin-top:1rem;">
+                ➕ رزرو نوبت برای این کارکن
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:3rem;">
+        کارکنی ثبت نشده است
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

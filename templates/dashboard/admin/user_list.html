@@ -1,0 +1,79 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}مدیریت کاربران{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}" class="active">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">خدمات</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:category_list' %}">📂 دسته‌بندی‌ها</a></li>
+    <li><a href="{% url 'dashboard:owner:service_list' %}">✨ خدمات</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">مدیریت کاربران</h1>
+    <a href="{% url 'dashboard:owner:user_create' %}" class="btn btn-primary">➕ افزودن کاربر</a>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>نام</th>
+                <th>شماره موبایل</th>
+                <th>نقش</th>
+                <th>وضعیت</th>
+                <th>تاریخ عضویت</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><strong>{{ user.get_full_name }}</strong></td>
+                <td style="direction:ltr;text-align:right;">{{ user.phone }}</td>
+                <td>
+                    <span class="badge
+                        {% if user.role == 'receptionist' %}badge-blue
+                        {% elif user.role == 'staff' %}badge-purple
+                        {% else %}badge-gray{% endif %}">
+                        {{ user.get_role_display }}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge {% if user.is_active %}badge-green{% else %}badge-red{% endif %}">
+                        {% if user.is_active %}فعال{% else %}غیرفعال{% endif %}
+                    </span>
+                </td>
+                <td>{{ user.date_joined|date:"Y/m/d" }}</td>
+                <td style="display:flex;gap:0.5rem;">
+                    <a href="{% url 'dashboard:owner:user_edit' user.pk %}" class="btn btn-secondary btn-sm">ویرایش</a>
+                    <form method="post" action="{% url 'dashboard:owner:user_toggle' user.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                            {% if user.is_active %}غیرفعال{% else %}فعال{% endif %}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">
+                    کاربری ثبت نشده است
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

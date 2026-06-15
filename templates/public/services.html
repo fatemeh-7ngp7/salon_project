@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}خدمات - سالن آرایشی{% endblock %}
+
+{% block content %}
+
+<div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:3rem 1rem;text-align:center;color:white;">
+    <h1 style="font-size:2rem;font-weight:700;margin-bottom:0.5rem;">خدمات ما</h1>
+    <p style="opacity:0.85;">انواع خدمات تخصصی آرایشی با بهترین کیفیت</p>
+</div>
+
+<div class="section" style="background:#f8fafc;">
+    <div class="container">
+        {% for category in categories %}
+        <div style="margin-bottom:3rem;">
+
+            <!-- عنوان دسته‌بندی -->
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #e2e8f0;">
+                <div class="gradient-pink" style="width:3rem;height:3rem;border-radius:0.875rem;display:flex;align-items:center;justify-content:center;font-size:1.375rem;flex-shrink:0;">
+                    {% if category.icon %}{{ category.icon }}{% else %}✨{% endif %}
+                </div>
+                <div>
+                    <h2 style="font-size:1.375rem;font-weight:700;color:#1e293b;">{{ category.name }}</h2>
+                    {% if category.description %}
+                    <p style="font-size:0.875rem;color:#64748b;margin-top:0.2rem;">{{ category.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- خدمات این دسته -->
+            <div class="grid grid-3" style="gap:1.25rem;">
+                {% for service in category.services.all %}
+                {% if service.is_active %}
+                <div class="card card-hover">
+                    <div class="card-body">
+                        <h3 style="font-size:1rem;font-weight:600;color:#1e293b;margin-bottom:0.75rem;">
+                            {{ service.name }}
+                        </h3>
+                        {% if service.description %}
+                        <p style="font-size:0.8rem;color:#64748b;margin-bottom:0.875rem;line-height:1.6;">
+                            {{ service.description }}
+                        </p>
+                        {% endif %}
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:0.75rem;border-top:1px solid #f1f5f9;">
+                            <div>
+                                <span style="font-size:0.72rem;color:#94a3b8;">مدت زمان</span>
+                                <div style="font-size:0.85rem;font-weight:600;color:#334155;">
+                                    {{ service.duration_display }}
+                                </div>
+                            </div>
+                            <div style="text-align:left;">
+                                <span style="font-size:0.72rem;color:#94a3b8;">قیمت</span>
+                                <div style="font-size:0.95rem;font-weight:700;color:#6d28d9;">
+                                    {{ service.price|floatformat:0 }} تومان
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- کارکنان این خدمت -->
+                        {% with service.staff_services.all as staff_services %}
+                        {% if staff_services %}
+                        <div style="margin-top:0.875rem;padding-top:0.875rem;border-top:1px solid #f1f5f9;">
+                            <p style="font-size:0.72rem;color:#94a3b8;margin-bottom:0.4rem;">متخصصین:</p>
+                            <div style="display:flex;flex-wrap:wrap;gap:0.35rem;">
+                                {% for ss in staff_services %}
+                                {% if ss.is_active %}
+                                <a href="{% url 'public:staff_detail' ss.staff.pk %}"
+                                   style="font-size:0.72rem;background:#f5f3ff;color:#6d28d9;padding:0.2rem 0.5rem;border-radius:9999px;text-decoration:none;font-weight:500;">
+                                    {{ ss.staff.user.get_full_name }}
+                                </a>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard:customer:appointment_create' %}"
+                           class="btn btn-primary btn-sm btn-block" style="margin-top:0.875rem;">
+                            رزرو نوبت
+                        </a>
+                        {% else %}
+                        <a href="{% url 'accounts:login' %}"
+                           class="btn btn-secondary btn-sm btn-block" style="margin-top:0.875rem;">
+                            برای رزرو وارد شوید
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                {% empty %}
+                <div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:2rem;">
+                    خدماتی در این دسته‌بندی ثبت نشده است
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align:center;color:#94a3b8;padding:4rem;">
+            <div style="font-size:3rem;margin-bottom:1rem;">✨</div>
+            <p>خدماتی ثبت نشده است</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}جزئیات کارکن{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}" class="active">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">خدمات</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:category_list' %}">📂 دسته‌بندی‌ها</a></li>
+    <li><a href="{% url 'dashboard:owner:service_list' %}">✨ خدمات</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{{ staff.user.get_full_name }}</h1>
+    <div style="display:flex;gap:0.75rem;">
+        <a href="{% url 'dashboard:owner:staff_schedule' staff.pk %}" class="btn btn-primary">📋 مدیریت برنامه</a>
+        <a href="{% url 'dashboard:owner:staff_list' %}" class="btn btn-secondary">بازگشت</a>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;">
+    <div class="card">
+        <div class="card-body" style="text-align:center;">
+            <div style="width:5rem;height:5rem;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2rem;">
+                👤
+            </div>
+            <h3 class="font-bold text-lg">{{ staff.user.get_full_name }}</h3>
+            <span class="badge badge-purple" style="margin-top:0.5rem;">{{ staff.specialty.name }}</span>
+            {% if staff.bio %}
+            <p class="text-sm text-gray-500" style="margin-top:1rem;">{{ staff.bio }}</p>
+            {% endif %}
+            <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f1f5f9;text-align:right;">
+                <p class="text-sm text-gray-600">📱 {{ staff.user.phone }}</p>
+                {% if staff.user.email %}
+                <p class="text-sm text-gray-600" style="margin-top:0.25rem;">📧 {{ staff.user.email }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+        <div class="card">
+            <div class="card-header">خدمات ارائه‌شده</div>
+            <div class="card-body">
+                {% for ss in staff.staff_services.all %}
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid #f8fafc;">
+                    <span class="font-medium">{{ ss.service.name }}</span>
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <span class="text-sm text-gray-500">{{ ss.service.duration_display }}</span>
+                        <span class="text-sm font-semibold" style="color:#6d28d9;">{{ ss.service.price|floatformat:0 }} تومان</span>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="remove_service">
+                            <input type="hidden" name="service_id" value="{{ ss.service.pk }}">
+                            <button type="submit" class="btn btn-danger btn-sm">حذف</button>
+                        </form>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-400 text-sm">خدماتی تعریف نشده</p>
+                {% endfor %}
+
+                {% if available_services %}
+                <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f1f5f9;">
+                    <p class="text-sm font-semibold text-gray-600" style="margin-bottom:0.75rem;">افزودن خدمت:</p>
+                    <form method="post" style="display:flex;gap:0.75rem;align-items:center;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_service">
+                        <select name="service_id" class="form-input" style="flex:1;">
+                            {% for svc in available_services %}
+                            <option value="{{ svc.pk }}">{{ svc.name }} ({{ svc.duration_display }})</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">افزودن</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>برنامه کاری هفتگی</span>
+                <a href="{% url 'dashboard:owner:staff_schedule' staff.pk %}" class="btn btn-secondary btn-sm">ویرایش</a>
+            </div>
+            <div class="card-body">
+                {% for schedule in staff.work_schedules.all %}
+                <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f8fafc;">
+                    <span class="font-medium">{{ schedule.get_day_of_week_display }}</span>
+                    <span class="text-sm text-gray-600">
+                        {{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}
+                    </span>
+                </div>
+                {% empty %}
+                <p class="text-gray-400 text-sm">برنامه کاری تعریف نشده</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

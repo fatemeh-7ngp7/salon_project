@@ -1,0 +1,155 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}کارکنان و منشی‌ها{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">مدیریت</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:index' %}">🏠 داشبورد</a></li>
+    <li><a href="{% url 'dashboard:owner:user_list' %}">👥 کاربران</a></li>
+    <li><a href="{% url 'dashboard:owner:staff_list' %}" class="active">💇 کارکنان</a></li>
+</ul>
+<div class="sidebar-section">خدمات</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:category_list' %}">📂 دسته‌بندی‌ها</a></li>
+    <li><a href="{% url 'dashboard:owner:service_list' %}">✨ خدمات</a></li>
+</ul>
+<div class="sidebar-section">نوبت‌ها</div>
+<ul class="sidebar-menu">
+    <li><a href="{% url 'dashboard:owner:appointment_list' %}">📅 همه نوبت‌ها</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">مدیریت کارکنان</h1>
+    <a href="{% url 'dashboard:owner:staff_create' %}" class="btn btn-primary">➕ کارکن جدید</a>
+</div>
+
+<!-- کارکنان -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header">کارکنان سالن</div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>نام</th>
+                    <th>شماره موبایل</th>
+                    <th>تخصص</th>
+                    <th>خدمات</th>
+                    <th>وضعیت</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in staff %}
+                <tr>
+                    <td><strong>{{ member.user.get_full_name }}</strong></td>
+                    <td style="direction:ltr;text-align:right;">{{ member.user.phone }}</td>
+                    <td><span class="badge badge-purple">{{ member.specialty.name }}</span></td>
+                    <td>{{ member.staff_services.count }} خدمت</td>
+                    <td>
+                        <span class="badge {% if member.is_active %}badge-green{% else %}badge-red{% endif %}">
+                            {% if member.is_active %}فعال{% else %}غیرفعال{% endif %}
+                        </span>
+                    </td>
+                    <td style="display:flex;gap:0.5rem;">
+                        <a href="{% url 'dashboard:owner:staff_detail' member.pk %}" class="btn btn-secondary btn-sm">جزئیات</a>
+                        <a href="{% url 'dashboard:owner:staff_schedule' member.pk %}" class="btn btn-secondary btn-sm">برنامه</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center;color:#94a3b8;padding:2rem;">
+                        کارکنی ثبت نشده است
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pending_staff %}
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header" style="background:#fef9c3;color:#a16207;">
+        ⚠️ کاربران کارکن بدون پروفایل
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>نام</th>
+                    <th>شماره موبایل</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in pending_staff %}
+                <tr>
+                    <td><strong>{{ u.get_full_name }}</strong></td>
+                    <td style="direction:ltr;text-align:right;">{{ u.phone }}</td>
+                    <td>
+                        <a href="{% url 'dashboard:owner:staff_create' %}?user_id={{ u.pk }}"
+                           class="btn btn-primary btn-sm">
+                            ➕ تکمیل پروفایل کارکن
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- منشی‌ها -->
+<div class="card">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>منشی‌های سالن</span>
+        <a href="{% url 'dashboard:owner:user_create' %}" class="btn btn-secondary btn-sm">➕ منشی جدید</a>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>نام</th>
+                    <th>شماره موبایل</th>
+                    <th>ایمیل</th>
+                    <th>وضعیت</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rec in receptionists %}
+                <tr>
+                    <td><strong>{{ rec.get_full_name }}</strong></td>
+                    <td style="direction:ltr;text-align:right;">{{ rec.phone }}</td>
+                    <td>{{ rec.email|default:'-' }}</td>
+                    <td>
+                        <span class="badge {% if rec.is_active %}badge-green{% else %}badge-red{% endif %}">
+                            {% if rec.is_active %}فعال{% else %}غیرفعال{% endif %}
+                        </span>
+                    </td>
+                    <td style="display:flex;gap:0.5rem;">
+                        <a href="{% url 'dashboard:owner:user_edit' rec.pk %}" class="btn btn-secondary btn-sm">ویرایش</a>
+                        <a href="{% url 'dashboard:owner:receptionist_schedule' rec.pk %}" class="btn btn-secondary btn-sm">برنامه</a>
+                        <form method="post" action="{% url 'dashboard:owner:user_toggle' rec.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm {% if rec.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                {% if rec.is_active %}غیرفعال{% else %}فعال{% endif %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center;color:#94a3b8;padding:2rem;">
+                        منشی‌ای ثبت نشده است
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
