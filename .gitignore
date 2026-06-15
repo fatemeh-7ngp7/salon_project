@@ -57,4 +57,4 @@ coverage.xml
 .pytest_cache/
 
 # Migrations (اختیاری - بعضی‌ها میذارن بعضی‌ها نه)
-apps/*/migrations/0*.py
+#apps/*/migrations/0*.py
